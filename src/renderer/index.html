@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Shiro Screen Share</title>
+  <link rel="icon" type="image/x-icon" href="icon.ico">
+  <link rel="stylesheet" href="index.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div id="app" class="app-container">
+    <!-- Custom Window Drag Bar -->
+    <header class="window-header">
+      <div class="header-title">
+        <img src="icon.ico" class="app-header-icon" alt="Shiro Logo" width="18" height="18">
+        <span class="app-name">Shiro Screen Share</span>
+        <span class="badge badge-ts">v2.0</span>
+      </div>
+      <div class="header-controls">
+        <button id="btn-theme-toggle" class="win-btn theme-toggle-btn" title="Alternar Tema Claro / Escuro">
+          <i data-lucide="sun"></i>
+        </button>
+        <button id="btn-minimize" class="win-btn" title="Minimizar">—</button>
+        <button id="btn-maximize" class="win-btn" title="Maximizar">☐</button>
+        <button id="btn-close" class="win-btn win-close" title="Fechar">✕</button>
+      </div>
+    </header>
+
+    <!-- Main Content Layout -->
+    <main class="main-content">
+      <!-- Left Column: Source Selection Grid (2x2) -->
+      <section class="sources-panel">
+        <div class="panel-header">
+          <h2>Selecione a Fonte</h2>
+          <button id="btn-refresh-sources" class="btn btn-secondary btn-sm" title="Atualizar Lista">
+            <i data-lucide="refresh-cw"></i>
+            <span>Atualizar</span>
+          </button>
+        </div>
+
+        <div class="tabs-container">
+          <button id="tab-windows" class="tab-btn active">
+            <i data-lucide="app-window"></i> Janelas
+          </button>
+          <button id="tab-screens" class="tab-btn">
+            <i data-lucide="screen-share"></i> Telas Inteiras
+          </button>
+        </div>
+
+        <div id="sources-grid" class="sources-grid grid-2x2">
+          <div class="loading-spinner">
+            <i data-lucide="loader-2" class="spin"></i> Carregando janelas...
+          </div>
+        </div>
+      </section>
+
+      <!-- Right Column: Giant Borderless Preview & Floating Overlays -->
+      <section class="preview-section">
+        <div class="preview-video-container">
+          <!-- Hidden inputs for deep link room parameters -->
+          <input type="hidden" id="input-room" value="">
+          <input type="hidden" id="input-identity" value="">
+
+          <video id="preview-video" autoplay muted playsinline></video>
+
+          <div id="preview-placeholder" class="preview-placeholder">
+            <i data-lucide="play-circle" class="placeholder-lucide-icon"></i>
+            <p>Selecione uma janela ao lado para visualizar e transmitir</p>
+          </div>
+
+          <!-- Top Overlay (Floating directly over top-left of video) -->
+          <div class="overlay-top-bar">
+            <div class="overlay-status-group">
+              <span id="stream-badge" class="badge badge-offline">Desconectado</span>
+              <div id="connection-tag" class="connection-tag hidden">
+                <i data-lucide="check-circle-2" class="icon-check-green"></i>
+                <span class="text-white-connected">Conectado</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Bottom Control Bar (Floating directly over bottom of video) -->
+          <div class="overlay-bottom-bar">
+            <div class="overlay-controls-left">
+              <button id="btn-start-stream" class="btn btn-primary btn-lg float-btn" disabled>
+                <i data-lucide="play"></i>
+                <span>Iniciar Transmissão</span>
+              </button>
+              <button id="btn-stop-stream" class="btn btn-danger btn-lg float-btn hidden">
+                <i data-lucide="square"></i>
+                <span>Encerrar Transmissão</span>
+              </button>
+            </div>
+
+            <div class="overlay-controls-right">
+              <!-- Audio Settings Overlay Trigger -->
+              <button id="btn-toggle-audio" class="overlay-icon-btn float-icon-btn" title="Modo de Áudio da Transmissão">
+                <i data-lucide="volume-2"></i>
+              </button>
+              <!-- Video Quality Settings Overlay Trigger -->
+              <button id="btn-toggle-settings" class="overlay-icon-btn float-icon-btn" title="Configurações da Transmissão (Engrenagem)">
+                <i data-lucide="settings"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- Video Quality Popover Panel -->
+          <div id="settings-popover" class="popover-panel hidden">
+            <div class="popover-header">
+              <h4><i data-lucide="settings"></i> Configurações de Transmissão</h4>
+              <button id="btn-close-settings" class="popover-close"><i data-lucide="x"></i></button>
+            </div>
+            <div class="popover-body">
+              <div class="setting-row">
+                <label for="select-resolution"><i data-lucide="monitor"></i> Resolução</label>
+                <select id="select-resolution" class="select-input">
+                  <option value="1080p" selected>1080p (1920x1080)</option>
+                  <option value="720p">720p (1280x720)</option>
+                  <option value="1440p">1440p 2K (2560x1440)</option>
+                  <option value="4k">4K (3840x2160)</option>
+                  <option value="480p">480p (854x480)</option>
+                </select>
+              </div>
+
+              <div class="setting-row">
+                <label for="select-fps"><i data-lucide="zap"></i> FPS</label>
+                <select id="select-fps" class="select-input">
+                  <option value="60" selected>60 FPS</option>
+                  <option value="30">30 FPS</option>
+                  <option value="120">120 FPS</option>
+                </select>
+              </div>
+
+              <div class="setting-row">
+                <label for="select-bitrate"><i data-lucide="wifi"></i> Bitrate</label>
+                <select id="select-bitrate" class="select-input">
+                  <option value="4500" selected>4.5 Mbps (Recomendado)</option>
+                  <option value="8000">8.0 Mbps (Alta Qualidade)</option>
+                  <option value="12000">12.0 Mbps (Ultra 2K/4K)</option>
+                  <option value="2500">2.5 Mbps (Econômico)</option>
+                </select>
+              </div>
+
+              <div class="setting-row">
+                <label for="select-priority"><i data-lucide="target"></i> Prioridade</label>
+                <select id="select-priority" class="select-input">
+                  <option value="maintain-resolution" selected>Resolução Máxima</option>
+                  <option value="maintain-framerate">Fluidez / FPS Máximo</option>
+                  <option value="balanced">Balanceado</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- Audio Settings Popover Panel -->
+          <div id="audio-popover" class="popover-panel hidden">
+            <div class="popover-header">
+              <h4><i data-lucide="volume-2"></i> Modo de Áudio</h4>
+              <button id="btn-close-audio" class="popover-close"><i data-lucide="x"></i></button>
+            </div>
+            <div class="popover-body">
+              <div class="audio-options">
+                <label class="radio-card active">
+                  <input type="radio" name="audioMode" value="process" checked>
+                  <div class="radio-content">
+                    <span class="radio-title"><i data-lucide="shield-check"></i> Apenas este Aplicativo</span>
+                    <span class="radio-desc">Captura exclusivamente o som do jogo/programa selecionado.</span>
+                  </div>
+                </label>
+
+                <label class="radio-card">
+                  <input type="radio" name="audioMode" value="system">
+                  <div class="radio-content">
+                    <span class="radio-title"><i data-lucide="volume-x"></i> Som do Sistema Inteiro</span>
+                    <span class="radio-desc">Captura todo o áudio de saída do computador.</span>
+                  </div>
+                </label>
+
+                <label class="radio-card">
+                  <input type="radio" name="audioMode" value="disabled">
+                  <div class="radio-content">
+                    <span class="radio-title"><i data-lucide="mic-off"></i> Sem Áudio</span>
+                    <span class="radio-desc">Transmite apenas o vídeo sem áudio.</span>
+                  </div>
+                </label>
+              </div>
+
+              <div class="vu-meter-container">
+                <div class="vu-header">
+                  <span>Nível de Áudio</span>
+                  <span id="vu-status-text" class="vu-status">Aguardando som...</span>
+                </div>
+                <canvas id="vu-canvas" class="vu-canvas"></canvas>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="app.bundle.js"></script>
+</body>
+</html>
