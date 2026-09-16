@@ -452,7 +452,7 @@ svg {
   position: absolute;
   bottom: 68px;
   right: 16px;
-  width: 320px;
+  width: 350px;
   background-color: var(--popover-bg);
   backdrop-filter: blur(16px);
   border: 1px solid var(--border-color);
@@ -537,7 +537,9 @@ svg {
   border: 1px solid var(--border-color);
   border-radius: var(--radius-sm);
   padding: 4px 8px;
-  font-size: 12px;
+  font-size: 11px;
+  max-width: 190px;
+  text-overflow: ellipsis;
   outline: none;
   cursor: pointer;
 }
