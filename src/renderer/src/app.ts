@@ -463,6 +463,7 @@ class ShiroApp {
         videoTrack: this.currentVideoTrack,
         audioTrack: audioTrack,
         qualityOptions: qualityOptions,
+        rawIdentity: rawIdentity,
         onDisconnected: () => {
           this.stopStreaming();
         },

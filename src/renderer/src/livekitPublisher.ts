@@ -7,6 +7,7 @@ export interface LiveKitPublishOptions {
   videoTrack: MediaStreamTrack;
   audioTrack?: MediaStreamTrack | null;
   qualityOptions?: StreamQualityOptions;
+  rawIdentity?: string;
   onDisconnected?: () => void;
 }
 
@@ -36,9 +37,17 @@ export class LiveKitPublisher {
       }
     });
 
-    this.room.on(RoomEvent.ParticipantDisconnected, () => {
-      if (this.room && this.room.remoteParticipants.size === 0) {
-        console.log('[LiveKit] All participants left/closed the activity. Auto-stopping stream...');
+    this.room.on(RoomEvent.ParticipantDisconnected, (participant) => {
+      const remainingCount = this.room?.remoteParticipants.size || 0;
+      console.log(`[LiveKit] Participant disconnected: ${participant.identity}. Remaining remote: ${remainingCount}`);
+
+      const mainUser = options.rawIdentity ? options.rawIdentity.replace('-capture', '') : '';
+      const disconnectedUser = participant.identity ? participant.identity.replace('-capture', '') : '';
+
+      const isMainUser = mainUser && (disconnectedUser === mainUser);
+
+      if (isMainUser || remainingCount === 0) {
+        console.log('[LiveKit] 🛑 Main user or all participants left the activity. Auto-stopping stream...');
         this.disconnect();
         if (options.onDisconnected) {
           options.onDisconnected();
