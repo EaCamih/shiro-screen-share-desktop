@@ -74,7 +74,7 @@ export class LiveKitPublisher {
       const pub = await this.room.localParticipant.publishTrack(options.videoTrack, {
         name: 'screen-video',
         source: Track.Source.ScreenShare,
-        videoCodec: 'h264',
+        videoCodec: 'vp8',
         simulcast: false,
         videoEncoding: {
           maxBitrate: maxBitrateBps,
