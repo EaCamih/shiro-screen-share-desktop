@@ -29,6 +29,18 @@ const api: ElectronAPI = {
     return ipcRenderer.invoke('get-resources-path');
   },
 
+  getAppSettings: () => {
+    return ipcRenderer.invoke('get-app-settings');
+  },
+
+  setOpenAtLogin: (enabled: boolean): Promise<boolean> => {
+    return ipcRenderer.invoke('set-open-at-login', enabled);
+  },
+
+  setAutoUpdate: (enabled: boolean): Promise<boolean> => {
+    return ipcRenderer.invoke('set-auto-update', enabled);
+  },
+
   minimizeWindow: (): void => {
     ipcRenderer.send('window-minimize');
   },

@@ -77,8 +77,15 @@ export class AudioPipeline {
       const currentTime = this.audioContext.currentTime;
       const chunkDuration = numFrames / 48000;
 
-      // Zero desync scheduler: queue chunk immediately at currentTime if nextPlayTime is behind
+      // 1. Catch up if nextPlayTime falls behind currentTime
       if (this.nextPlayTime < currentTime) {
+        this.nextPlayTime = currentTime;
+      }
+
+      // 2. Ultra-Low Latency Anti-Drift Guard: Cap maximum buffer to 5ms (0.005s)
+      // Any audio queued more than 5ms ahead is snapped to currentTime immediately!
+      const MAX_DRIFT_BUFFER_SEC = 0.005; // 5ms ultra-low latency cap
+      if (this.nextPlayTime > currentTime + MAX_DRIFT_BUFFER_SEC) {
         this.nextPlayTime = currentTime;
       }
 

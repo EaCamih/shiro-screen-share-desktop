@@ -1,6 +1,7 @@
 import { app, BrowserWindow, Tray, Menu, nativeImage } from 'electron';
 import path from 'path';
 import dotenv from 'dotenv';
+import { autoUpdater } from 'electron-updater';
 import { registerDeepLinkProtocol, parseDeepLinkUrl } from './protocol';
 import { AudioCaptureEngine } from './audioEngine';
 import { setupIpcHandlers } from './ipcHandlers';
@@ -163,9 +164,71 @@ function createTray(iconPath: string): void {
   }
 }
 
+let autoUpdateEnabled: boolean = true;
+
+export function isAutoUpdateEnabled(): boolean {
+  return autoUpdateEnabled;
+}
+
+export function setAutoUpdateEnabled(enabled: boolean): void {
+  autoUpdateEnabled = enabled;
+  autoUpdater.autoDownload = enabled;
+  if (!enabled) {
+    console.log('[AutoUpdater] Auto updates disabled by user.');
+  }
+}
+
+function setupAutoUpdater(): void {
+  autoUpdater.autoDownload = autoUpdateEnabled;
+  autoUpdater.autoInstallOnAppQuit = autoUpdateEnabled;
+
+  autoUpdater.on('checking-for-update', () => {
+    console.log('[AutoUpdater] Checking for updates on GitHub...');
+  });
+
+  autoUpdater.on('update-available', (info) => {
+    if (!autoUpdateEnabled) return;
+    console.log(`[AutoUpdater] 🚀 New update available: v${info.version}`);
+    if (mainWindow && !mainWindow.isDestroyed()) {
+      mainWindow.webContents.send('update-available', info);
+    }
+  });
+
+  autoUpdater.on('update-not-available', () => {
+    console.log('[AutoUpdater] App is up to date.');
+  });
+
+  autoUpdater.on('download-progress', (progressObj) => {
+    if (!autoUpdateEnabled) return;
+    console.log(`[AutoUpdater] Downloading update... ${progressObj.percent.toFixed(1)}%`);
+    if (mainWindow && !mainWindow.isDestroyed()) {
+      mainWindow.webContents.send('update-progress', progressObj);
+    }
+  });
+
+  autoUpdater.on('update-downloaded', (info) => {
+    if (!autoUpdateEnabled) return;
+    console.log('[AutoUpdater] ✅ Update downloaded. Will install automatically on app quit.');
+    if (mainWindow && !mainWindow.isDestroyed()) {
+      mainWindow.webContents.send('update-downloaded', info);
+    }
+  });
+
+  if (app.isPackaged && autoUpdateEnabled) {
+    setTimeout(() => {
+      if (autoUpdateEnabled) {
+        autoUpdater.checkForUpdatesAndNotify().catch((err) => {
+          console.warn('[AutoUpdater] Error checking updates:', err);
+        });
+      }
+    }, 3000);
+  }
+}
+
 app.whenReady().then(() => {
   createWindow();
   handleArgvDeepLink(process.argv);
+  setupAutoUpdater();
 });
 
 app.on('window-all-closed', () => {

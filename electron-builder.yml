@@ -1,5 +1,9 @@
 appId: com.shiro.screenshare
 productName: Shiro Screen Share
+publish:
+  provider: github
+  owner: ti0hito
+  repo: shiro-screen-share-desktop
 directories:
   output: release
   buildResources: build

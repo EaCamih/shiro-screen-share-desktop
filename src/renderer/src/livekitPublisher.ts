@@ -94,9 +94,9 @@ export class LiveKitPublisher {
               enc.scaleResolutionDownBy = 1.0;
               enc.priority = 'high';
             });
-            params.degradationPreference = options.qualityOptions?.degradationPreference || 'maintain-resolution';
+            params.degradationPreference = options.qualityOptions?.degradationPreference || 'maintain-framerate';
             await sender.setParameters(params);
-            console.log('[LiveKit] ✅ RTCRtpSender parameters applied:', params);
+            console.log('[LiveKit] ✅ RTCRtpSender parameters applied (maintain-framerate zero-delay):', params);
           }
         }
       } catch (err) {

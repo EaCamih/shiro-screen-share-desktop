@@ -10,6 +10,11 @@ export interface DeepLinkParams {
   [key: string]: string | undefined;
 }
 
+export interface AppSettings {
+  openAtLogin: boolean;
+  autoUpdate: boolean;
+}
+
 export interface ElectronAPI {
   // Main Process Invocations (Renderer -> Main -> Renderer)
   getAvailableSources: () => Promise<WindowSource[]>;
@@ -17,6 +22,9 @@ export interface ElectronAPI {
   stopAudioCapture: () => Promise<void>;
   fetchLiveKitToken: (backendUrl: string, roomName: string, identity: string, userName?: string) => Promise<string>;
   getResourcesPath: () => Promise<string>;
+  getAppSettings: () => Promise<AppSettings>;
+  setOpenAtLogin: (enabled: boolean) => Promise<boolean>;
+  setAutoUpdate: (enabled: boolean) => Promise<boolean>;
   minimizeWindow: () => void;
   maximizeWindow: () => void;
   closeWindow: () => void;

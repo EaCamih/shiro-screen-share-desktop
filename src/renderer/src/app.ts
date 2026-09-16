@@ -22,6 +22,7 @@ import {
   Loader2,
   Settings,
   X,
+  Power,
 } from 'lucide';
 import { SourcePicker } from './sourcePicker';
 import { AudioPipeline } from './audioPipeline';
@@ -50,6 +51,7 @@ class ShiroApp {
     this.setupPopoverToggles();
     this.setupStreamButtons();
     this.setupDeepLinkListener();
+    this.setupAppSettings();
 
     // Mount the canvas visualizer (does not start animation yet)
     this.audioVisualizer.mount('vu-canvas');
@@ -59,6 +61,37 @@ class ShiroApp {
 
     // Initial load of windows
     await this.refreshSources();
+  }
+
+  private async setupAppSettings(): Promise<void> {
+    const chkOpenAtLogin = document.getElementById('chk-open-at-login') as HTMLInputElement;
+    const chkAutoUpdate = document.getElementById('chk-auto-update') as HTMLInputElement;
+
+    if (window.api && window.api.getAppSettings) {
+      try {
+        const settings = await window.api.getAppSettings();
+        if (chkOpenAtLogin) chkOpenAtLogin.checked = settings.openAtLogin;
+        if (chkAutoUpdate) chkAutoUpdate.checked = settings.autoUpdate;
+      } catch (err) {
+        console.warn('[App] Could not load app settings:', err);
+      }
+    }
+
+    chkOpenAtLogin?.addEventListener('change', async () => {
+      if (window.api && window.api.setOpenAtLogin) {
+        const newState = await window.api.setOpenAtLogin(chkOpenAtLogin.checked);
+        chkOpenAtLogin.checked = newState;
+        console.log('[App] Start with Windows set to:', newState);
+      }
+    });
+
+    chkAutoUpdate?.addEventListener('change', async () => {
+      if (window.api && window.api.setAutoUpdate) {
+        const newState = await window.api.setAutoUpdate(chkAutoUpdate.checked);
+        chkAutoUpdate.checked = newState;
+        console.log('[App] Auto updates set to:', newState);
+      }
+    });
   }
 
   private refreshIcons(): void {
@@ -87,6 +120,7 @@ class ShiroApp {
           Loader2,
           Settings,
           X,
+          Power,
         },
       });
     } catch (err) {
@@ -246,7 +280,7 @@ class ShiroApp {
     const selectRes = (document.getElementById('select-resolution') as HTMLSelectElement)?.value || '1080p';
     const selectFps = parseInt((document.getElementById('select-fps') as HTMLSelectElement)?.value || '60', 10);
     const selectBitrate = parseInt((document.getElementById('select-bitrate') as HTMLSelectElement)?.value || '4500', 10);
-    const selectPriority = ((document.getElementById('select-priority') as HTMLSelectElement)?.value || 'maintain-resolution') as any;
+    const selectPriority = ((document.getElementById('select-priority') as HTMLSelectElement)?.value || 'maintain-framerate') as any;
 
     const resMap: Record<string, { width: number; height: number }> = {
       '1080p': { width: 1920, height: 1080 },

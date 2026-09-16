@@ -1,14 +1,39 @@
-import { ipcMain, BrowserWindow } from 'electron';
+import { ipcMain, BrowserWindow, app } from 'electron';
 import http from 'http';
 import https from 'https';
 import { scanSources } from './windowScanner';
 import { AudioCaptureEngine } from './audioEngine';
 import { AudioCaptureConfig } from '../types/capture';
+import { isAutoUpdateEnabled, setAutoUpdateEnabled } from './main';
 
 export function setupIpcHandlers(
   window: BrowserWindow,
   audioEngine: AudioCaptureEngine
 ): void {
+  // Settings IPC Handlers
+  ipcMain.handle('get-app-settings', () => {
+    const loginSettings = app.getLoginItemSettings();
+    return {
+      openAtLogin: loginSettings.openAtLogin,
+      autoUpdate: isAutoUpdateEnabled(),
+    };
+  });
+
+  ipcMain.handle('set-open-at-login', (_event, enabled: boolean) => {
+    app.setLoginItemSettings({
+      openAtLogin: enabled,
+      openAsHidden: false,
+    });
+    console.log(`[IPC] Open at login set to: ${enabled}`);
+    return app.getLoginItemSettings().openAtLogin;
+  });
+
+  ipcMain.handle('set-auto-update', (_event, enabled: boolean) => {
+    setAutoUpdateEnabled(enabled);
+    console.log(`[IPC] Auto update set to: ${enabled}`);
+    return enabled;
+  });
+
   // Get available window & screen sources with PID resolution
   ipcMain.handle('get-available-sources', async () => {
     try {

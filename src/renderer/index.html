@@ -17,7 +17,7 @@
       <div class="header-title">
         <img src="icon.ico" class="app-header-icon" alt="Shiro Logo" width="18" height="18">
         <span class="app-name">Shiro Screen Share</span>
-        <span class="badge badge-ts">v2.0</span>
+        <span class="badge badge-ts">v2.0.1</span>
       </div>
       <div class="header-controls">
         <button id="btn-theme-toggle" class="win-btn theme-toggle-btn" title="Alternar Tema Claro / Escuro">
@@ -147,10 +147,28 @@
               <div class="setting-row">
                 <label for="select-priority"><i data-lucide="target"></i> Prioridade</label>
                 <select id="select-priority" class="select-input">
-                  <option value="maintain-resolution" selected>Resolução Máxima</option>
-                  <option value="maintain-framerate">Fluidez / FPS Máximo</option>
+                  <option value="maintain-framerate" selected>Fluidez / Zero Latência (Recomendado)</option>
+                  <option value="maintain-resolution">Resolução Máxima</option>
                   <option value="balanced">Balanceado</option>
                 </select>
+              </div>
+
+              <div class="popover-divider"></div>
+
+              <div class="setting-row setting-toggle-row">
+                <label for="chk-open-at-login"><i data-lucide="power"></i> Iniciar com o Windows</label>
+                <label class="toggle-switch">
+                  <input type="checkbox" id="chk-open-at-login">
+                  <span class="toggle-slider"></span>
+                </label>
+              </div>
+
+              <div class="setting-row setting-toggle-row">
+                <label for="chk-auto-update"><i data-lucide="refresh-cw"></i> Atualizações Automáticas</label>
+                <label class="toggle-switch">
+                  <input type="checkbox" id="chk-auto-update" checked>
+                  <span class="toggle-slider"></span>
+                </label>
               </div>
             </div>
           </div>
