@@ -7,6 +7,7 @@ export interface LiveKitPublishOptions {
   videoTrack: MediaStreamTrack;
   audioTrack?: MediaStreamTrack | null;
   qualityOptions?: StreamQualityOptions;
+  onDisconnected?: () => void;
 }
 
 export class LiveKitPublisher {
@@ -27,9 +28,22 @@ export class LiveKitPublisher {
       },
     });
 
-    this.room.on(RoomEvent.Disconnected, () => {
-      console.log('[LiveKit] Disconnected from room');
+    this.room.on(RoomEvent.Disconnected, (reason) => {
+      console.log('[LiveKit] Disconnected from room:', reason);
       this.isConnected = false;
+      if (options.onDisconnected) {
+        options.onDisconnected();
+      }
+    });
+
+    this.room.on(RoomEvent.ParticipantDisconnected, () => {
+      if (this.room && this.room.remoteParticipants.size === 0) {
+        console.log('[LiveKit] All participants left/closed the activity. Auto-stopping stream...');
+        this.disconnect();
+        if (options.onDisconnected) {
+          options.onDisconnected();
+        }
+      }
     });
 
     console.log(`[LiveKit] Connecting to room ${options.wsUrl}...`);

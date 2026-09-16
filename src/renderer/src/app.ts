@@ -463,6 +463,9 @@ class ShiroApp {
         videoTrack: this.currentVideoTrack,
         audioTrack: audioTrack,
         qualityOptions: qualityOptions,
+        onDisconnected: () => {
+          this.stopStreaming();
+        },
       });
 
       setStreamStatus(true, '🔴 AO VIVO');
